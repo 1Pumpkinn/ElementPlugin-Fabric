@@ -3,7 +3,7 @@ package net.saturn.elementpluginfabric.managers;
 import net.saturn.elementpluginfabric.ElementPluginFabric;
 import net.saturn.elementpluginfabric.data.DataStore;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,7 +43,7 @@ public class TrustManager {
     public boolean hasPending(UUID target, UUID requestor) {
         return pending.getOrDefault(target, Set.of()).contains(requestor);
     }
-    
+
     public void clearPending(UUID target, UUID requestor) {
         Set<UUID> set = pending.get(target);
         if (set != null) set.remove(requestor);
@@ -63,10 +63,9 @@ public class TrustManager {
     public List<String> getTrustedNames(UUID owner, MinecraftServer server) {
         List<String> out = new ArrayList<>();
         for (UUID u : getTrusted(owner)) {
-            ServerPlayerEntity p = server.getPlayerManager().getPlayer(u);
+            ServerPlayer p = server.getPlayerList().getPlayer(u);
             out.add(p != null ? p.getName().getString() : u.toString());
         }
         return out;
     }
 }
-

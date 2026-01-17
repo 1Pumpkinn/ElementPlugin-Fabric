@@ -3,8 +3,8 @@ package net.saturn.elementpluginfabric.services;
 import net.saturn.elementpluginfabric.data.PlayerData;
 import net.saturn.elementpluginfabric.elements.ElementType;
 import net.saturn.elementpluginfabric.managers.TrustManager;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 public class ValidationService {
     private final TrustManager trustManager;
@@ -13,11 +13,11 @@ public class ValidationService {
         this.trustManager = trustManager;
     }
 
-    public boolean isValidTarget(ServerPlayerEntity attacker, LivingEntity target) {
+    public boolean isValidTarget(ServerPlayer attacker, LivingEntity target) {
         if (target.equals(attacker)) return false;
 
-        if (target instanceof ServerPlayerEntity targetPlayer) {
-            return !trustManager.isTrusted(attacker.getUuid(), targetPlayer.getUuid());
+        if (target instanceof ServerPlayer targetPlayer) {
+            return !trustManager.isTrusted(attacker.getUUID(), targetPlayer.getUUID());
         }
 
         return true;
@@ -27,8 +27,7 @@ public class ValidationService {
         return pd.getCurrentElementUpgradeLevel() >= required;
     }
 
-    public boolean canUseElementItem(ServerPlayerEntity player, ElementType itemElement, PlayerData pd) {
+    public boolean canUseElementItem(ServerPlayer player, ElementType itemElement, PlayerData pd) {
         return pd.getCurrentElement() == itemElement;
     }
 }
-

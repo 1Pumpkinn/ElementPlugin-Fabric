@@ -1,8 +1,12 @@
 package net.saturn.elementpluginfabric.managers;
 
+import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
+import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
+import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.network.chat.Component;
 import net.saturn.elementpluginfabric.ElementPluginFabric;
 import net.saturn.elementpluginfabric.config.Constants;
 import net.saturn.elementpluginfabric.data.DataStore;
@@ -70,33 +74,33 @@ public class ElementManager {
     }
 
     public boolean isCurrentlyRolling(ServerPlayer player) {
-        return currentlyRolling.contains(player.getUuid());
+        return currentlyRolling.contains(player.getUUID());
     }
 
     public void cancelRolling(ServerPlayer player) {
-        currentlyRolling.remove(player.getUuid());
-        activeAnimations.remove(player.getUuid());
+        currentlyRolling.remove(player.getUUID());
+        activeAnimations.remove(player.getUUID());
     }
 
     public void rollAndAssign(ServerPlayer player) {
         if (!beginRoll(player)) return;
 
-        player.makeSound(SoundEvents.UI_TOAST_IN, SoundSource.MASTER, 1f, 1.2f);
+        player.playNotifySound(SoundEvents.UI_TOAST_IN, SoundSource.MASTER, 1f, 1.2f);
 
         RollingAnimation animation = new RollingAnimation(player, BASIC_ELEMENTS);
-        activeAnimations.put(player.getUuid(), animation);
+        activeAnimations.put(player.getUUID(), animation);
         animation.start(() -> {
             assignRandomElement(player);
             endRoll(player);
         });
     }
 
-    private void assignRandomElement(ServerPlayerEntity player) {
+    private void assignRandomElement(ServerPlayer player) {
         ElementType randomType = BASIC_ELEMENTS[random.nextInt(BASIC_ELEMENTS.length)];
         assignElementInternal(player, randomType, "Element Assigned!");
     }
 
-    public void assignRandomDifferentElement(ServerPlayerEntity player) {
+    public void assignRandomDifferentElement(ServerPlayer player) {
         ElementType current = getPlayerElement(player);
         List<ElementType> available = Arrays.stream(BASIC_ELEMENTS)
                 .filter(type -> type != current)
@@ -109,12 +113,12 @@ public class ElementManager {
         assignElementInternal(player, newType, "Element Rerolled!");
     }
 
-    public void assignElement(ServerPlayerEntity player, ElementType type) {
+    public void assignElement(ServerPlayer player, ElementType type) {
         assignElementInternal(player, type, "Element Chosen!", true);
     }
 
-    public void setElement(ServerPlayerEntity player, ElementType type) {
-        PlayerData pd = data(player.getUuid());
+    public void setElement(ServerPlayer player, ElementType type) {
+        PlayerData pd = data(player.getUUID());
         ElementType old = pd.getCurrentElement();
 
         if (old != null && old != type) {
@@ -124,18 +128,17 @@ public class ElementManager {
         pd.setCurrentElement(type);
         store.save(pd);
 
-        player.sendMessage(Text.literal("Your element is now ")
-                .formatted(Formatting.GOLD)
-                .append(Text.literal(type.name()).formatted(Formatting.AQUA)), false);
+        player.sendSystemMessage(Component.literal("Your element is now ")
+                .append(Component.literal(type.name()).withStyle(style -> style.withColor(0x55FFFF))));
         applyUpsides(player);
     }
 
-    private void assignElementInternal(ServerPlayerEntity player, ElementType type, String titleText) {
+    private void assignElementInternal(ServerPlayer player, ElementType type, String titleText) {
         assignElementInternal(player, type, titleText, false);
     }
 
-    private void assignElementInternal(ServerPlayerEntity player, ElementType type, String titleText, boolean resetLevel) {
-        PlayerData pd = data(player.getUuid());
+    private void assignElementInternal(ServerPlayer player, ElementType type, String titleText, boolean resetLevel) {
+        PlayerData pd = data(player.getUUID());
         ElementType old = pd.getCurrentElement();
 
         if (old != null && old != type) {
@@ -153,28 +156,28 @@ public class ElementManager {
         store.save(pd);
         showElementTitle(player, type, titleText);
         applyUpsides(player);
-        player.playSoundToPlayer(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundCategory.MASTER, 1f, 1f);
+        player.playNotifySound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.MASTER, 1f, 1f);
     }
 
-    private void handleElementSwitch(ServerPlayerEntity player, ElementType oldElement) {
+    private void handleElementSwitch(ServerPlayer player, ElementType oldElement) {
         returnLifeOrDeathCore(player, oldElement);
         effectService.clearAllElementEffects(player);
     }
 
-    public void applyUpsides(ServerPlayerEntity player) {
+    public void applyUpsides(ServerPlayer player) {
         effectService.applyPassiveEffects(player);
     }
 
-    public boolean useAbility1(ServerPlayerEntity player) {
+    public boolean useAbility1(ServerPlayer player) {
         return useAbility(player, 1);
     }
 
-    public boolean useAbility2(ServerPlayerEntity player) {
+    public boolean useAbility2(ServerPlayer player) {
         return useAbility(player, 2);
     }
 
-    private boolean useAbility(ServerPlayerEntity player, int number) {
-        PlayerData pd = data(player.getUuid());
+    private boolean useAbility(ServerPlayer player, int number) {
+        PlayerData pd = data(player.getUUID());
         ElementType type = pd.getCurrentElement();
         Element element = registry.get(type);
 
@@ -193,46 +196,49 @@ public class ElementManager {
         return number == 1 ? element.ability1(ctx) : element.ability2(ctx);
     }
 
-    public void giveElementItem(ServerPlayerEntity player, ElementType type) {
+    public void giveElementItem(ServerPlayer player, ElementType type) {
         // TODO: Implement ElementCoreItem for Fabric
         // var item = ElementCoreItem.createCore(plugin, type);
         // if (item != null) {
-        //     player.getInventory().offerOrDrop(item);
+        //     player.getInventory().add(item);
         // }
     }
 
-    private void showElementTitle(ServerPlayerEntity player, ElementType type, String title) {
-        player.networkHandler.sendPacket(new TitleS2CPacket(
-                Text.literal(title).formatted(Formatting.GOLD),
-                Text.literal(type.name()).formatted(Formatting.AQUA),
-                10, 40, 10
+    private void showElementTitle(ServerPlayer player, ElementType type, String title) {
+        // Send title packets (Fabric/Vanilla way)
+        player.connection.send(new ClientboundSetTitleTextPacket(
+                Component.literal(title).withStyle(style -> style.withColor(0xFFAA00))
         ));
+        player.connection.send(new ClientboundSetSubtitleTextPacket(
+                Component.literal(type.name()).withStyle(style -> style.withColor(0x55FFFF))
+        ));
+        player.connection.send(new ClientboundSetTitlesAnimationPacket(10, 40, 10));
     }
 
-    private void returnLifeOrDeathCore(ServerPlayerEntity player, ElementType oldElement) {
+    private void returnLifeOrDeathCore(ServerPlayer player, ElementType oldElement) {
         if (oldElement != ElementType.LIFE && oldElement != ElementType.DEATH) return;
-        if (!data(player.getUuid()).hasElementItem(oldElement)) return;
+        if (!data(player.getUUID()).hasElementItem(oldElement)) return;
 
         // TODO: Implement ElementCoreItem for Fabric
         // var core = ElementCoreItem.createCore(plugin, oldElement);
         // if (core != null) {
-        //     player.getInventory().offerOrDrop(core);
-        //     player.sendMessage(Text.literal("Your core has been returned!").formatted(Formatting.YELLOW), false);
+        //     player.getInventory().add(core);
+        //     player.sendSystemMessage(Component.literal("Your core has been returned!").withStyle(style -> style.withColor(0xFFFF55)));
         // }
     }
 
-    private boolean beginRoll(ServerPlayerEntity player) {
+    private boolean beginRoll(ServerPlayer player) {
         if (isCurrentlyRolling(player)) {
-            player.sendMessage(Text.literal("You are already rerolling!").formatted(Formatting.RED), false);
+            player.sendSystemMessage(Component.literal("You are already rerolling!").withStyle(style -> style.withColor(0xFF5555)));
             return false;
         }
-        currentlyRolling.add(player.getUuid());
+        currentlyRolling.add(player.getUUID());
         return true;
     }
 
-    private void endRoll(ServerPlayerEntity player) {
-        currentlyRolling.remove(player.getUuid());
-        activeAnimations.remove(player.getUuid());
+    private void endRoll(ServerPlayer player) {
+        currentlyRolling.remove(player.getUUID());
+        activeAnimations.remove(player.getUUID());
     }
 
     private void startAnimationTicker() {
@@ -247,12 +253,12 @@ public class ElementManager {
      * Reusable rolling animation
      */
     private class RollingAnimation {
-        private final ServerPlayerEntity player;
+        private final ServerPlayer player;
         private final ElementType[] elements;
         private int tick = 0;
         private Runnable onComplete;
 
-        RollingAnimation(ServerPlayerEntity player, ElementType[] elements) {
+        RollingAnimation(ServerPlayer player, ElementType[] elements) {
             this.player = player;
             this.elements = elements;
         }
@@ -262,7 +268,7 @@ public class ElementManager {
         }
 
         void tick() {
-            if (player.isDisconnected() || !isCurrentlyRolling(player)) {
+            if (player.hasDisconnected() || !isCurrentlyRolling(player)) {
                 endRoll(player);
                 return;
             }
@@ -275,14 +281,15 @@ public class ElementManager {
 
             if (tick % Constants.Animation.ROLL_DELAY_TICKS == 0) {
                 String name = elements[random.nextInt(elements.length)].name();
-                player.networkHandler.sendPacket(new TitleS2CPacket(
-                        Text.literal("Rolling...").formatted(Formatting.GOLD),
-                        Text.literal(name).formatted(Formatting.AQUA),
-                        0, 10, 0
+                player.connection.send(new ClientboundSetTitleTextPacket(
+                        Component.literal("Rolling...").withStyle(style -> style.withColor(0xFFAA00))
                 ));
+                player.connection.send(new ClientboundSetSubtitleTextPacket(
+                        Component.literal(name).withStyle(style -> style.withColor(0x55FFFF))
+                ));
+                player.connection.send(new ClientboundSetTitlesAnimationPacket(0, 10, 0));
             }
             tick++;
         }
     }
 }
-

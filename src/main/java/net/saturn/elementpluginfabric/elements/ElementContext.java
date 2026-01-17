@@ -4,14 +4,14 @@ import net.saturn.elementpluginfabric.ElementPluginFabric;
 import net.saturn.elementpluginfabric.managers.ConfigManager;
 import net.saturn.elementpluginfabric.managers.ManaManager;
 import net.saturn.elementpluginfabric.managers.TrustManager;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * Context object that encapsulates all managers required for element abilities.
  * Uses builder pattern for flexible construction.
  */
 public class ElementContext {
-    private final ServerPlayerEntity player;
+    private final ServerPlayer player;
     private final int upgradeLevel;
     private final ManaManager manaManager;
     private final TrustManager trustManager;
@@ -30,7 +30,7 @@ public class ElementContext {
     }
 
     // Getters
-    public ServerPlayerEntity getPlayer() { return player; }
+    public ServerPlayer getPlayer() { return player; }
     public int getUpgradeLevel() { return upgradeLevel; }
     public ElementType getElementType() { return elementType; }
     public ManaManager getManaManager() { return manaManager; }
@@ -44,7 +44,7 @@ public class ElementContext {
     }
 
     public static class Builder {
-        private ServerPlayerEntity player;
+        private ServerPlayer player;
         private int upgradeLevel;
         private ElementType elementType;
         private ManaManager manaManager;
@@ -52,7 +52,7 @@ public class ElementContext {
         private ConfigManager configManager;
         private ElementPluginFabric plugin;
 
-        public Builder player(ServerPlayerEntity player) {
+        public Builder player(ServerPlayer player) {
             this.player = player;
             return this;
         }
@@ -92,4 +92,3 @@ public class ElementContext {
         }
     }
 }
-
