@@ -152,6 +152,10 @@ public class ConfigManager {
     }
 
     public int getItemUseCost(ElementType type) {
+        if (type == null) {
+            // Default cost when element type is not specified
+            return getInt("costs.default.item_use", 75);
+        }
         return getInt("costs." + type.name().toLowerCase() + ".item_use", 75);
     }
 

@@ -90,7 +90,9 @@ public class ElementPluginFabric implements ModInitializer {
     
     private void registerItems() {
         LOGGER.info("Registering items...");
-        ItemRegistry.register();
+        // Trigger static field initialization by accessing ItemRegistry
+        // This ensures items are registered before ItemManager tries to use them
+        ItemRegistry.register(); // This will initialize static fields and register items
         LOGGER.info("Items registered");
     }
 

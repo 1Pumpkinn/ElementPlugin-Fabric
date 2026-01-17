@@ -161,11 +161,17 @@ public class ElementManager {
 
     private void handleElementSwitch(ServerPlayer player, ElementType oldElement) {
         returnLifeOrDeathCore(player, oldElement);
-        effectService.clearAllElementEffects(player);
+        EffectService service = plugin.getEffectService();
+        if (service != null) {
+            service.clearAllElementEffects(player);
+        }
     }
 
     public void applyUpsides(ServerPlayer player) {
-        effectService.applyPassiveEffects(player);
+        EffectService service = plugin.getEffectService();
+        if (service != null) {
+            service.applyPassiveEffects(player);
+        }
     }
 
     public boolean useAbility1(ServerPlayer player) {

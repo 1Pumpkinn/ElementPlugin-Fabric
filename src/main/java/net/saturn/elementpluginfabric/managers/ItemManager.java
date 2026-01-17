@@ -1,12 +1,8 @@
 package net.saturn.elementpluginfabric.managers;
 
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.saturn.elementpluginfabric.ElementPluginFabric;
-import net.saturn.elementpluginfabric.items.AdvancedRerollerItem;
-import net.saturn.elementpluginfabric.items.RerollerItem;
-import net.saturn.elementpluginfabric.items.Upgrader1Item;
-import net.saturn.elementpluginfabric.items.Upgrader2Item;
+import net.saturn.elementpluginfabric.items.ItemRegistry;
 
 public class ItemManager {
     @SuppressWarnings("unused")
@@ -16,11 +12,11 @@ public class ItemManager {
     @SuppressWarnings("unused")
     private final ConfigManager configManager;
     
-    // Item instances - these will be registered in ItemRegistry
-    public static final net.minecraft.world.item.Item UPGRADER_1 = new Upgrader1Item(new net.minecraft.world.item.Item.Properties());
-    public static final net.minecraft.world.item.Item UPGRADER_2 = new Upgrader2Item(new net.minecraft.world.item.Item.Properties());
-    public static final net.minecraft.world.item.Item REROLLER = new RerollerItem(new net.minecraft.world.item.Item.Properties());
-    public static final net.minecraft.world.item.Item ADVANCED_REROLLER = new AdvancedRerollerItem(new net.minecraft.world.item.Item.Properties());
+    // Reference to registered items from ItemRegistry
+    public static final net.minecraft.world.item.Item UPGRADER_1 = ItemRegistry.UPGRADER_1;
+    public static final net.minecraft.world.item.Item UPGRADER_2 = ItemRegistry.UPGRADER_2;
+    public static final net.minecraft.world.item.Item REROLLER = ItemRegistry.REROLLER;
+    public static final net.minecraft.world.item.Item ADVANCED_REROLLER = ItemRegistry.ADVANCED_REROLLER;
 
     public ItemManager(ElementPluginFabric plugin, ManaManager mana, ConfigManager configManager) {
         this.plugin = plugin;
