@@ -2,7 +2,9 @@ package net.saturn.elementpluginfabric;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.saturn.elementpluginfabric.commands.CommandRegistry;
 import net.saturn.elementpluginfabric.data.DataStore;
+import net.saturn.elementpluginfabric.items.ItemRegistry;
 import net.saturn.elementpluginfabric.managers.*;
 import net.saturn.elementpluginfabric.services.EffectService;
 import net.saturn.elementpluginfabric.services.ValidationService;
@@ -80,15 +82,21 @@ public class ElementPluginFabric implements ModInitializer {
     }
 
     private void registerComponents() {
+        registerItems();
         registerCommands();
         registerListeners();
         registerRecipes();
     }
+    
+    private void registerItems() {
+        LOGGER.info("Registering items...");
+        ItemRegistry.register();
+        LOGGER.info("Items registered");
+    }
 
     private void registerCommands() {
         LOGGER.info("Registering commands...");
-        // Commands will be registered via Fabric command API
-        // TODO: Register commands
+        CommandRegistry.register();
         LOGGER.info("Commands registered");
     }
 
