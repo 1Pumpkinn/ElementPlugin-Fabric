@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "elementplugin",
+  "version": "1.1.16",
+  "name": "ElementPlugin",
+  "description": "Element system plugin for Fabric 1.21.10",
+  "authors": [
+    "___Pumpkinn"],
+
+  "contact": {
+    "homepage": "https://ko-fi.com/1pumpkinn"
+  },
+  "license": "MIT",
+  "icon": "assets/elementplugin/icon.png",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      "net.saturn.elementpluginfabric.ElementPluginFabric"
+    ]
+  },
+  "mixins": [
+    "elementpluginfabric.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "fabric-api": "*",
+    "minecraft": "~1.21.10",
+    "java": ">=21"
+  }
+}
+
