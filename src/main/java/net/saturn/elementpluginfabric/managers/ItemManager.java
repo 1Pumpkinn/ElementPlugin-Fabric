@@ -13,8 +13,8 @@ public class ItemManager {
     private final ConfigManager configManager;
     
     // Reference to registered items from ItemRegistry
-    public static final net.minecraft.world.item.Item UPGRADER_1 = ItemRegistry.UPGRADER_1;
-    public static final net.minecraft.world.item.Item UPGRADER_2 = ItemRegistry.UPGRADER_2;
+    public static final net.minecraft.world.item.Item UPGRADER_1 = ItemRegistry.UPGRADER_I;
+    public static final net.minecraft.world.item.Item UPGRADER_2 = ItemRegistry.UPGRADER_II;
     public static final net.minecraft.world.item.Item REROLLER = ItemRegistry.REROLLER;
     public static final net.minecraft.world.item.Item ADVANCED_REROLLER = ItemRegistry.ADVANCED_REROLLER;
 

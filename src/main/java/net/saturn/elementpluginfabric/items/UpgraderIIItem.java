@@ -14,9 +14,9 @@ import net.saturn.elementpluginfabric.data.PlayerData;
 import net.saturn.elementpluginfabric.elements.ElementType;
 import net.saturn.elementpluginfabric.managers.ElementManager;
 
-public class Upgrader1Item extends Item {
+public class UpgraderIIItem extends Item {
     
-    public Upgrader1Item(Properties properties) {
+    public UpgraderIIItem(Properties properties) {
         super(properties);
     }
     
@@ -35,20 +35,26 @@ public class Upgrader1Item extends Item {
             PlayerData data = ElementPluginFabric.getInstance().getDataStore().getPlayerData(player.getUUID());
             int currentLevel = data.getCurrentElementUpgradeLevel();
             
-            if (currentLevel >= 1) {
-                player.sendSystemMessage(Component.literal("You already have upgrade level 1!")
+            if (currentLevel < 1) {
+                player.sendSystemMessage(Component.literal("You need upgrade level 1 first!")
                     .withStyle(ChatFormatting.YELLOW));
                 return InteractionResult.FAIL;
             }
             
-            // Set upgrade level to 1
-            data.setCurrentElementUpgradeLevel(1);
+            if (currentLevel >= 2) {
+                player.sendSystemMessage(Component.literal("You already have upgrade level 2!")
+                    .withStyle(ChatFormatting.YELLOW));
+                return InteractionResult.FAIL;
+            }
+            
+            // Set upgrade level to 2
+            data.setCurrentElementUpgradeLevel(2);
             ElementPluginFabric.getInstance().getDataStore().save(data);
             
             // Apply new effects
             elementManager.applyUpsides(player);
             
-            player.sendSystemMessage(Component.literal("Upgraded to level 1!")
+            player.sendSystemMessage(Component.literal("Upgraded to level 2!")
                 .withStyle(ChatFormatting.GREEN));
             
             // Consume item

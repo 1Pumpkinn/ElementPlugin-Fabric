@@ -1,7 +1,7 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "elementplugin:item/upgrader_2"
+    "layer0": "elementplugin:item/upgrader_I"
   }
 }
 

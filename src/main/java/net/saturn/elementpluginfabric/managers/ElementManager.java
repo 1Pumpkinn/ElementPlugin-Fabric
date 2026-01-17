@@ -50,15 +50,14 @@ public class ElementManager {
     public EffectService getEffectService() { return effectService; }
 
     private void registerAllElements() {
-        // TODO: Create Fabric versions of all element implementations
-        // registry.put(ElementType.AIR, new AirElement(plugin));
-        // registry.put(ElementType.WATER, new WaterElement(plugin));
-        // registry.put(ElementType.FIRE, new FireElement(plugin));
-        // registry.put(ElementType.EARTH, new EarthElement(plugin));
-        // registry.put(ElementType.LIFE, new LifeElement(plugin));
-        // registry.put(ElementType.DEATH, new DeathElement(plugin));
-        // registry.put(ElementType.METAL, new MetalElement(plugin));
-        // registry.put(ElementType.FROST, new FrostElement(plugin));
+        registry.put(ElementType.AIR, new net.saturn.elementpluginfabric.elements.impl.AirElement(plugin));
+        registry.put(ElementType.WATER, new net.saturn.elementpluginfabric.elements.impl.WaterElement(plugin));
+        registry.put(ElementType.FIRE, new net.saturn.elementpluginfabric.elements.impl.FireElement(plugin));
+        registry.put(ElementType.EARTH, new net.saturn.elementpluginfabric.elements.impl.EarthElement(plugin));
+        registry.put(ElementType.LIFE, new net.saturn.elementpluginfabric.elements.impl.LifeElement(plugin));
+        registry.put(ElementType.DEATH, new net.saturn.elementpluginfabric.elements.impl.DeathElement(plugin));
+        registry.put(ElementType.METAL, new net.saturn.elementpluginfabric.elements.impl.MetalElement(plugin));
+        registry.put(ElementType.FROST, new net.saturn.elementpluginfabric.elements.impl.FrostElement(plugin));
     }
 
     public PlayerData data(UUID uuid) {
@@ -187,7 +186,11 @@ public class ElementManager {
         ElementType type = pd.getCurrentElement();
         Element element = registry.get(type);
 
-        if (element == null) return false;
+        if (element == null) {
+            player.sendSystemMessage(Component.literal("You don't have an element assigned!")
+                    .withStyle(net.minecraft.ChatFormatting.RED));
+            return false;
+        }
 
         ElementContext ctx = ElementContext.builder()
                 .player(player)

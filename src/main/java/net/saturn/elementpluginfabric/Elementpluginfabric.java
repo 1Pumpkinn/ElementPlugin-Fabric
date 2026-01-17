@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.saturn.elementpluginfabric.commands.CommandRegistry;
 import net.saturn.elementpluginfabric.data.DataStore;
 import net.saturn.elementpluginfabric.items.ItemRegistry;
+import net.saturn.elementpluginfabric.listeners.ElementPassiveListener;
 import net.saturn.elementpluginfabric.managers.*;
 import net.saturn.elementpluginfabric.services.EffectService;
 import net.saturn.elementpluginfabric.services.ValidationService;
@@ -13,9 +14,9 @@ import org.slf4j.LoggerFactory;
 
 public class ElementPluginFabric implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger("ElementPlugin");
-    
+
     private static ElementPluginFabric instance;
-    
+
     private DataStore dataStore;
     private ConfigManager configManager;
     private ElementManager elementManager;
@@ -28,7 +29,7 @@ public class ElementPluginFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         instance = this;
-        
+
         try {
             LOGGER.info("Initializing ElementPlugin for Fabric 1.21.10...");
             initializeCore();
@@ -36,13 +37,13 @@ public class ElementPluginFabric implements ModInitializer {
             initializeServices();
             registerComponents();
             startBackgroundTasks();
-            
+
             LOGGER.info("ElementPlugin v1.1.16 enabled successfully!");
         } catch (Exception e) {
             LOGGER.error("Failed to enable plugin", e);
             throw new RuntimeException("Failed to initialize ElementPlugin", e);
         }
-        
+
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             try {
                 stopBackgroundTasks();
@@ -63,21 +64,21 @@ public class ElementPluginFabric implements ModInitializer {
 
     private void initializeManagers() {
         LOGGER.info("Initializing managers...");
-        
+
         this.trustManager = new TrustManager(this);
         this.manaManager = new ManaManager(this, dataStore, configManager);
         this.elementManager = new ElementManager(this, dataStore, manaManager, trustManager, configManager);
         this.itemManager = new ItemManager(this, manaManager, configManager);
-        
+
         LOGGER.info("Managers initialized");
     }
 
     private void initializeServices() {
         LOGGER.info("Initializing services...");
-        
+
         this.effectService = new EffectService(this, elementManager);
         this.validationService = new ValidationService(trustManager);
-        
+
         LOGGER.info("Services initialized");
     }
 
@@ -88,21 +89,16 @@ public class ElementPluginFabric implements ModInitializer {
         registerRecipes();
         registerNetworking();
     }
-    
+
     private void registerNetworking() {
         LOGGER.info("Registering networking...");
-        // Networking is registered on both client and server
-        // Client registration happens in ElementpluginfabricClient
-        // Server registration happens in AbilityPacket.register()
         net.saturn.elementpluginfabric.network.AbilityPacket.register();
         LOGGER.info("Networking registered");
     }
-    
+
     private void registerItems() {
         LOGGER.info("Registering items...");
-        // Trigger static field initialization by accessing ItemRegistry
-        // This ensures items are registered before ItemManager tries to use them
-        ItemRegistry.register(); // This will initialize static fields and register items
+        ItemRegistry.register();
         LOGGER.info("Items registered");
     }
 
@@ -114,14 +110,12 @@ public class ElementPluginFabric implements ModInitializer {
 
     private void registerListeners() {
         LOGGER.info("Registering listeners...");
-        // Listeners will be registered via Fabric event API
-        // TODO: Register listeners
+        ElementPassiveListener.register(this);
         LOGGER.info("Listeners registered");
     }
 
     private void registerRecipes() {
         LOGGER.info("Registering recipes...");
-        // Recipes will be registered via Fabric recipe API
         // TODO: Register recipes
         LOGGER.info("Recipes registered");
     }
@@ -157,4 +151,3 @@ public class ElementPluginFabric implements ModInitializer {
     public EffectService getEffectService() { return effectService; }
     public ValidationService getValidationService() { return validationService; }
 }
-

@@ -16,8 +16,8 @@ import java.lang.reflect.Method;
 public class ItemRegistry {
     
     // Item instances - created and registered here
-    public static final Item UPGRADER_1 = registerItem("upgrader_1", Upgrader1Item::new);
-    public static final Item UPGRADER_2 = registerItem("upgrader_2", Upgrader2Item::new);
+    public static final Item UPGRADER_I = registerItem("upgrader_I", UpgraderIItem::new);
+    public static final Item UPGRADER_II = registerItem("upgrader_II", UpgraderIIItem::new);
     public static final Item REROLLER = registerItem("reroller", RerollerItem::new);
     public static final Item ADVANCED_REROLLER = registerItem("advanced_reroller", AdvancedRerollerItem::new);
     
@@ -26,15 +26,15 @@ public class ItemRegistry {
         
         // Items are already registered via static field initialization above
         // Force initialization by accessing the fields
-        ElementPluginFabric.LOGGER.info("Item UPGRADER_1 registered: {}", BuiltInRegistries.ITEM.getKey(UPGRADER_1));
-        ElementPluginFabric.LOGGER.info("Item UPGRADER_2 registered: {}", BuiltInRegistries.ITEM.getKey(UPGRADER_2));
+        ElementPluginFabric.LOGGER.info("Item UPGRADER_1 registered: {}", BuiltInRegistries.ITEM.getKey(UPGRADER_I));
+        ElementPluginFabric.LOGGER.info("Item UPGRADER_2 registered: {}", BuiltInRegistries.ITEM.getKey(UPGRADER_II));
         ElementPluginFabric.LOGGER.info("Item REROLLER registered: {}", BuiltInRegistries.ITEM.getKey(REROLLER));
         ElementPluginFabric.LOGGER.info("Item ADVANCED_REROLLER registered: {}", BuiltInRegistries.ITEM.getKey(ADVANCED_REROLLER));
         
         // Now add them to creative inventory
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries -> {
-            entries.accept(UPGRADER_1);
-            entries.accept(UPGRADER_2);
+            entries.accept(UPGRADER_I);
+            entries.accept(UPGRADER_II);
             entries.accept(REROLLER);
             entries.accept(ADVANCED_REROLLER);
         });
