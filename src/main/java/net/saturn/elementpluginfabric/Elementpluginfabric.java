@@ -86,6 +86,16 @@ public class ElementPluginFabric implements ModInitializer {
         registerCommands();
         registerListeners();
         registerRecipes();
+        registerNetworking();
+    }
+    
+    private void registerNetworking() {
+        LOGGER.info("Registering networking...");
+        // Networking is registered on both client and server
+        // Client registration happens in ElementpluginfabricClient
+        // Server registration happens in AbilityPacket.register()
+        net.saturn.elementpluginfabric.network.AbilityPacket.register();
+        LOGGER.info("Networking registered");
     }
     
     private void registerItems() {

@@ -2,6 +2,8 @@
   "item.elementplugin.upgrader_1": "Upgrader I",
   "item.elementplugin.upgrader_2": "Upgrader II",
   "item.elementplugin.reroller": "Reroller",
-  "item.elementplugin.advanced_reroller": "Advanced Reroller"
+  "item.elementplugin.advanced_reroller": "Advanced Reroller",
+  "key.elementplugin.ability1": "Ability 1",
+  "key.elementplugin.ability2": "Ability 2",
+  "key.category.elementplugin.abilities": "Element Plugin"
 }
-

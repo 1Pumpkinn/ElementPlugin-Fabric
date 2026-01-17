@@ -15,6 +15,9 @@
   "entrypoints": {
     "main": [
       "net.saturn.elementpluginfabric.ElementPluginFabric"
+    ],
+    "client": [
+      "net.saturn.elementpluginfabric.client.ElementpluginfabricClient"
     ]
   },
   "mixins": [
