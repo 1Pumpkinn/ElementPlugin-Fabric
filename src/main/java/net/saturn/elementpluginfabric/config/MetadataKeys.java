@@ -24,6 +24,10 @@ public final class MetadataKeys {
     public static final class Metal {
         public static final String CHAIN_STUN = "metal_chain_stunned";
         public static final String DASH_STUN = "metal_dash_stunned";
+        public static final String DASHING_UNTIL = "metal_dashing_until";
+        public static final String WAITING_FOR_LANDING = "metal_waiting_for_landing";
+        public static final String GRACE_UNTIL = "metal_dash_grace_until";
+        public static final String HAS_HIT = "metal_dash_has_hit";
 
         private Metal() {}
     }

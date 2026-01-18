@@ -36,6 +36,14 @@ public class TemporaryEntityData {
         entityLongs.computeIfAbsent(entityId, k -> new ConcurrentHashMap<>()).put(key, value);
     }
 
+    public static boolean getBoolean(UUID entityId, String key) {
+        return getLong(entityId, key) == 1L;
+    }
+
+    public static void putBoolean(UUID entityId, String key, boolean value) {
+        putLong(entityId, key, value ? 1L : 0L);
+    }
+
     public static void remove(UUID entityId, String key) {
         Map<String, String> strings = entityStrings.get(entityId);
         if (strings != null) {

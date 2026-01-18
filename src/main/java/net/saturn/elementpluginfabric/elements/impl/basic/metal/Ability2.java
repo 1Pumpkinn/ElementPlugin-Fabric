@@ -43,43 +43,32 @@ public class Ability2 {
         }
 
         Vec3 lookVec = player.getLookAngle();
-        double dashStrength = 3.0;
+        double dashStrength = 1.5; // Nerfed from 2.0 to be less OP
 
         Vec3 dashVelocity = new Vec3(
                 lookVec.x * dashStrength,
-                lookVec.y * dashStrength + 0.2,
+                lookVec.y * dashStrength + 0.2, // Slightly reduced upward boost
                 lookVec.z * dashStrength
         );
 
         player.setDeltaMovement(dashVelocity);
         player.hurtMarked = true;
 
-        // Check for enemies hit during dash
-        List<LivingEntity> hitEntities = player.level().getEntitiesOfClass(
-                LivingEntity.class,
-                player.getBoundingBox().inflate(2.0),
-                entity -> entity != player &&
-                        !entity.isSpectator() &&
-                        plugin.getValidationService().isValidTarget(player, entity)
+        // Clear old dash states
+        TemporaryEntityData.remove(player.getUUID(), MetadataKeys.Metal.HAS_HIT);
+        TemporaryEntityData.remove(player.getUUID(), MetadataKeys.Metal.WAITING_FOR_LANDING);
+        TemporaryEntityData.remove(player.getUUID(), MetadataKeys.Metal.GRACE_UNTIL);
+        TemporaryEntityData.remove(player.getUUID(), MetadataKeys.Metal.DASH_STUN);
+
+        // Set dashing state for 15 ticks (0.75 seconds)
+        TemporaryEntityData.putLong(
+                player.getUUID(),
+                MetadataKeys.Metal.DASHING_UNTIL,
+                System.currentTimeMillis() + 750L
         );
 
-        if (hitEntities.isEmpty()) {
-            // Missed all enemies - stun self for 5 seconds
-            TemporaryEntityData.putLong(
-                    player.getUUID(),
-                    MetadataKeys.Metal.DASH_STUN,
-                    System.currentTimeMillis() + 5000L
-            );
-            player.sendSystemMessage(Component.literal("Metal Dash missed! You're stunned!")
-                    .withStyle(ChatFormatting.RED));
-        } else {
-            // Hit enemies - deal true damage
-            for (LivingEntity entity : hitEntities) {
-                entity.hurt(player.damageSources().generic(), 8.0f); // 4 hearts true damage
-            }
-            player.sendSystemMessage(Component.literal("Metal Dash! Hit " + hitEntities.size() + " enemies!")
-                    .withStyle(ChatFormatting.GRAY));
-        }
+        player.sendSystemMessage(Component.literal("Metal Dash!")
+                .withStyle(ChatFormatting.GRAY));
 
         return true;
     }

@@ -45,7 +45,8 @@ public final class Constants {
         public static final long FROST_PUNCH_READY_MS = 10_000L;
         public static final long FROST_FREEZE_MS = 5_000L;
         public static final long FROST_CIRCLE_MS = 10_000L;
-        public static final long METAL_CHAIN_STUN_MS = 3_000L;
+        public static final long METAL_CHAIN_STUN_MS = 5_000L;
+        public static final long METAL_DASH_STUN_MS = 5_000L;
 
         private Duration() {}
     }

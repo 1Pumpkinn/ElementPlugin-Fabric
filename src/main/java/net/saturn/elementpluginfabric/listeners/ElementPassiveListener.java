@@ -12,6 +12,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -25,7 +26,11 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.network.chat.Component;
 import net.saturn.elementpluginfabric.ElementPluginFabric;
+import net.saturn.elementpluginfabric.config.Constants;
 import net.saturn.elementpluginfabric.config.MetadataKeys;
 import net.saturn.elementpluginfabric.data.PlayerData;
 import net.saturn.elementpluginfabric.data.TemporaryPlayerData;
@@ -241,6 +246,76 @@ public class ElementPassiveListener {
                             player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 2400, 0)); // Absorption for 2m
                         }
                     }
+                }
+
+                // METAL Dash Handling
+                long dashingUntil = TemporaryEntityData.getLong(player.getUUID(), MetadataKeys.Metal.DASHING_UNTIL);
+                if (dashingUntil > System.currentTimeMillis()) {
+                    // Check for enemies in path
+                    List<LivingEntity> hitByDash = player.level().getEntitiesOfClass(
+                            LivingEntity.class,
+                            player.getBoundingBox().inflate(1.5),
+                            e -> e != player && !e.isSpectator() && plugin.getValidationService().isValidTarget(player, e)
+                    );
+
+                    if (!hitByDash.isEmpty()) {
+                            for (LivingEntity target : hitByDash) {
+                                target.hurt(player.damageSources().generic(), 8.0f);
+                                player.playNotifySound(SoundEvents.ZOMBIE_ATTACK_IRON_DOOR, SoundSource.PLAYERS, 0.5f, 1.5f);
+                            }
+                            // Set hit flag and clear dash state
+                            TemporaryEntityData.putLong(player.getUUID(), MetadataKeys.Metal.HAS_HIT, 1L);
+                            TemporaryEntityData.remove(player.getUUID(), MetadataKeys.Metal.DASHING_UNTIL);
+                            
+                            player.sendSystemMessage(Component.literal("Metal Dash! Hit " + hitByDash.size() + " enemies!")
+                                    .withStyle(net.minecraft.ChatFormatting.GRAY));
+                        }
+                    }
+
+                    // Transition from dash end to waiting for landing
+                    if (dashingUntil > 0 && dashingUntil <= System.currentTimeMillis()) {
+                        TemporaryEntityData.remove(player.getUUID(), MetadataKeys.Metal.DASHING_UNTIL);
+                        // Only need to wait for landing if we haven't hit anyone yet
+                        if (TemporaryEntityData.getLong(player.getUUID(), MetadataKeys.Metal.HAS_HIT) != 1L) {
+                            TemporaryEntityData.putLong(player.getUUID(), MetadataKeys.Metal.WAITING_FOR_LANDING, 1L);
+                        } else {
+                            // Reset hit flag for next dash
+                            TemporaryEntityData.remove(player.getUUID(), MetadataKeys.Metal.HAS_HIT);
+                        }
+                    }
+
+                    // Handle landing -> Start 1.5s Grace Period
+                    if (TemporaryEntityData.getLong(player.getUUID(), MetadataKeys.Metal.WAITING_FOR_LANDING) == 1L && player.onGround()) {
+                        TemporaryEntityData.remove(player.getUUID(), MetadataKeys.Metal.WAITING_FOR_LANDING);
+                        // Start 1.5s grace period to hit a mob
+                        TemporaryEntityData.putLong(player.getUUID(), MetadataKeys.Metal.GRACE_UNTIL, System.currentTimeMillis() + 1500L);
+                    }
+
+                // Handle Grace Period Logic
+                long graceUntil = TemporaryEntityData.getLong(player.getUUID(), MetadataKeys.Metal.GRACE_UNTIL);
+                if (graceUntil > System.currentTimeMillis()) {
+                    // Check for hits during grace (walking into them)
+                    List<LivingEntity> hitDuringGrace = player.level().getEntitiesOfClass(
+                            LivingEntity.class,
+                            player.getBoundingBox().inflate(1.2),
+                            e -> e != player && !e.isSpectator() && plugin.getValidationService().isValidTarget(player, e)
+                    );
+
+                    if (!hitDuringGrace.isEmpty()) {
+                        for (LivingEntity target : hitDuringGrace) {
+                            target.hurt(player.damageSources().generic(), 4.0f); // Half damage for grace hits
+                            player.playNotifySound(SoundEvents.IRON_GOLEM_ATTACK, SoundSource.PLAYERS, 0.5f, 1.0f);
+                        }
+                        TemporaryEntityData.remove(player.getUUID(), MetadataKeys.Metal.GRACE_UNTIL);
+                        player.sendSystemMessage(Component.literal("Metal Dash! Recovery cancelled!")
+                                .withStyle(net.minecraft.ChatFormatting.GREEN));
+                    }
+                } else if (graceUntil > 0) {
+                    // Grace period expired without a hit -> 5s Stun
+                    TemporaryEntityData.remove(player.getUUID(), MetadataKeys.Metal.GRACE_UNTIL);
+                    TemporaryEntityData.putLong(player.getUUID(), MetadataKeys.Metal.DASH_STUN, System.currentTimeMillis() + Constants.Duration.METAL_DASH_STUN_MS);
+                    player.sendSystemMessage(Component.literal("Metal Dash recovery...")
+                            .withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
                 }
 
                 // DEATH Upgrade 2: Nearby enemies get Hunger I

@@ -17,11 +17,17 @@ public abstract class LivingEntityMixin {
         LivingEntity entity = (LivingEntity) (Object) this;
         long now = System.currentTimeMillis();
 
+        // Check if entity is dashing (Metal Dash) - if so, don't stun
+        if (TemporaryEntityData.getLong(entity.getUUID(), MetadataKeys.Metal.DASHING_UNTIL) > now) {
+            return;
+        }
+
         // Check if entity is stunned by Metal Chain, Metal Dash, or Frost
-        if (TemporaryEntityData.getLong(entity.getUUID(), MetadataKeys.Metal.CHAIN_STUN) > now ||
+        // Stuns only apply when on ground (no mid-air freezing)
+        if (entity.onGround() && (TemporaryEntityData.getLong(entity.getUUID(), MetadataKeys.Metal.CHAIN_STUN) > now ||
             TemporaryEntityData.getLong(entity.getUUID(), MetadataKeys.Metal.DASH_STUN) > now ||
             TemporaryEntityData.getLong(entity.getUUID(), MetadataKeys.Frost.FROZEN) > now ||
-            TemporaryEntityData.getLong(entity.getUUID(), MetadataKeys.Frost.CIRCLE_FROZEN) > now) {
+            TemporaryEntityData.getLong(entity.getUUID(), MetadataKeys.Frost.CIRCLE_FROZEN) > now)) {
             
             // Cancel all movement
             entity.setDeltaMovement(Vec3.ZERO);
