@@ -116,7 +116,7 @@ public class ElementPluginFabric implements ModInitializer {
 
     private void registerRecipes() {
         LOGGER.info("Registering recipes...");
-        // TODO: Register recipes
+        net.saturn.elementpluginfabric.recipes.UtilRecipes.register(this);
         LOGGER.info("Recipes registered");
     }
 

@@ -4,6 +4,7 @@
   "package": "net.saturn.elementpluginfabric.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "LivingEntityMixin"
   ],
   "client": [
   ],

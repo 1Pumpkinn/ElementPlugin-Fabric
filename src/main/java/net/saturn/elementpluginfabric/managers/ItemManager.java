@@ -13,10 +13,11 @@ public class ItemManager {
     private final ConfigManager configManager;
     
     // Reference to registered items from ItemRegistry
-    public static final net.minecraft.world.item.Item UPGRADER_1 = ItemRegistry.UPGRADER_I;
-    public static final net.minecraft.world.item.Item UPGRADER_2 = ItemRegistry.UPGRADER_II;
+    public static final net.minecraft.world.item.Item UPGRADER_I = ItemRegistry.UPGRADER_I;
+    public static final net.minecraft.world.item.Item UPGRADER_II = ItemRegistry.UPGRADER_II;
     public static final net.minecraft.world.item.Item REROLLER = ItemRegistry.REROLLER;
     public static final net.minecraft.world.item.Item ADVANCED_REROLLER = ItemRegistry.ADVANCED_REROLLER;
+    public static final net.minecraft.world.item.Item ELEMENT_CORE = ItemRegistry.ELEMENT_CORE;
 
     public ItemManager(ElementPluginFabric plugin, ManaManager mana, ConfigManager configManager) {
         this.plugin = plugin;
@@ -25,19 +26,19 @@ public class ItemManager {
     }
     
     /**
-     * Creates an Upgrader1 item
+     * Creates an Upgrader I item
      * @return The created ItemStack
      */
-    public net.minecraft.world.item.ItemStack createUpgrader1() {
-        return new net.minecraft.world.item.ItemStack(UPGRADER_1);
+    public net.minecraft.world.item.ItemStack createUpgraderI() {
+        return new net.minecraft.world.item.ItemStack(UPGRADER_I);
     }
     
     /**
-     * Creates an Upgrader2 item
+     * Creates an Upgrader II item
      * @return The created ItemStack
      */
-    public net.minecraft.world.item.ItemStack createUpgrader2() {
-        return new net.minecraft.world.item.ItemStack(UPGRADER_2);
+    public net.minecraft.world.item.ItemStack createUpgraderII() {
+        return new net.minecraft.world.item.ItemStack(UPGRADER_II);
     }
     
     /**
@@ -54,6 +55,34 @@ public class ItemManager {
      */
     public net.minecraft.world.item.ItemStack createAdvancedReroller() {
         return new net.minecraft.world.item.ItemStack(ADVANCED_REROLLER);
+    }
+
+    /**
+     * Creates an Element Core item
+     * @return The created ItemStack
+     */
+    public net.minecraft.world.item.ItemStack createElementCore() {
+        return new net.minecraft.world.item.ItemStack(ELEMENT_CORE);
+    }
+
+    public boolean isUpgraderI(ItemStack stack) {
+        return stack != null && stack.is(UPGRADER_I);
+    }
+
+    public boolean isUpgraderII(ItemStack stack) {
+        return stack != null && stack.is(UPGRADER_II);
+    }
+
+    public boolean isReroller(ItemStack stack) {
+        return stack != null && stack.is(REROLLER);
+    }
+
+    public boolean isAdvancedReroller(ItemStack stack) {
+        return stack != null && stack.is(ADVANCED_REROLLER);
+    }
+
+    public boolean isElementCore(ItemStack stack) {
+        return stack != null && stack.is(ELEMENT_CORE);
     }
 }
 

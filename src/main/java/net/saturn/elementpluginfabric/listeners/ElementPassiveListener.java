@@ -9,6 +9,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -27,6 +29,7 @@ import net.saturn.elementpluginfabric.ElementPluginFabric;
 import net.saturn.elementpluginfabric.config.MetadataKeys;
 import net.saturn.elementpluginfabric.data.PlayerData;
 import net.saturn.elementpluginfabric.data.TemporaryPlayerData;
+import net.saturn.elementpluginfabric.data.TemporaryEntityData;
 import net.saturn.elementpluginfabric.elements.ElementType;
 
 import java.util.List;
@@ -47,6 +50,7 @@ public class ElementPassiveListener {
         registerAttackListener();
         registerBlockBreakListener();
         registerTickListener();
+        registerMobTickListener();
     }
 
     private void registerDamageListener() {
@@ -137,8 +141,12 @@ public class ElementPassiveListener {
                 return;
             }
 
-            // EARTH Upgrade 2: Double ore drops (without Silk Touch, stacks with Fortune)
-            if (element == ElementType.EARTH && pd.getCurrentElementUpgradeLevel() >= 2) {
+            // EARTH Upgrade 2 or Earth Tunnel: Double ore drops
+            boolean isEarthUpgrade2 = element == ElementType.EARTH && pd.getCurrentElementUpgradeLevel() >= 2;
+            long mineUntil = TemporaryPlayerData.getLong(serverPlayer.getUUID(), MetadataKeys.Earth.MINE_UNTIL);
+            boolean isEarthTunnel = element == ElementType.EARTH && mineUntil > System.currentTimeMillis();
+
+            if (isEarthUpgrade2 || isEarthTunnel) {
                 ItemStack tool = serverPlayer.getMainHandItem();
 
                 // Check if tool has Silk Touch
@@ -183,21 +191,54 @@ public class ElementPassiveListener {
                 }
 
                 // LIFE Upgrade 2: Auto-grow crops in 5-block radius
-                if (element == ElementType.LIFE && pd.getCurrentElementUpgradeLevel() >= 2) {
-                    if (server.getTickCount() % 20 == 0) { // Every second
-                        BlockPos playerPos = player.blockPosition();
-                        for (int x = -5; x <= 5; x++) {
-                            for (int y = -2; y <= 2; y++) {
-                                for (int z = -5; z <= 5; z++) {
-                                    BlockPos cropPos = playerPos.offset(x, y, z);
-                                    BlockState cropState = player.level().getBlockState(cropPos);
-                                    if (cropState.getBlock() instanceof CropBlock crop) {
-                                        if (!crop.isMaxAge(cropState)) {
-                                            player.level().setBlock(cropPos, crop.getStateForAge(crop.getMaxAge()), 2);
+                if (element == ElementType.LIFE) {
+                    // Passive 1: Faster natural regeneration (0.5 heart every 2 seconds)
+                    if (server.getTickCount() % 40 == 0 && player.getHealth() < player.getMaxHealth()) {
+                        player.heal(1.0f);
+                    }
+
+                    if (pd.getCurrentElementUpgradeLevel() >= 2) {
+                        if (server.getTickCount() % 20 == 0) { // Every second
+                            BlockPos playerPos = player.blockPosition();
+                            for (int x = -5; x <= 5; x++) {
+                                for (int y = -2; y <= 2; y++) {
+                                    for (int z = -5; z <= 5; z++) {
+                                        BlockPos cropPos = playerPos.offset(x, y, z);
+                                        BlockState cropState = player.level().getBlockState(cropPos);
+                                        if (cropState.getBlock() instanceof CropBlock crop) {
+                                            if (!crop.isMaxAge(cropState)) {
+                                                player.level().setBlock(cropPos, crop.getStateForAge(crop.getMaxAge()), 2);
+                                            }
                                         }
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+
+                // AIR Upgrade 2: Super Jump
+                if (element == ElementType.AIR && pd.getCurrentElementUpgradeLevel() >= 2) {
+                    // Detect jump server-side
+                    boolean isJumping = player.isJumping();
+                    boolean wasOnGround = TemporaryPlayerData.getBoolean(player.getUUID(), "was_on_ground");
+                    
+                    if (isJumping && wasOnGround) {
+                        net.minecraft.world.phys.Vec3 velocity = player.getDeltaMovement();
+                        player.setDeltaMovement(velocity.x, 0.8, velocity.z); // High jump
+                        player.hurtMarked = true;
+                    }
+                    TemporaryPlayerData.putBoolean(player.getUUID(), "was_on_ground", player.onGround());
+                }
+
+                // DEATH: Food effects
+                if (element == ElementType.DEATH) {
+                    // Check if player is finishing eating
+                    if (player.isUsingItem() && player.getUseItemRemainingTicks() == 1) {
+                        ItemStack item = player.getUseItem();
+                        if (isUndeadFood(item)) {
+                            player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 100, 3)); // Reg IV for 5s
+                            player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 2400, 0)); // Absorption for 2m
                         }
                     }
                 }
@@ -222,6 +263,77 @@ public class ElementPassiveListener {
         });
     }
 
+    private void registerMobTickListener() {
+        ServerTickEvents.END_WORLD_TICK.register((world) -> {
+            if (!(world instanceof ServerLevel serverWorld)) return;
+            
+            for (net.minecraft.world.entity.Entity entity : serverWorld.getAllEntities()) {
+                if (!(entity instanceof Mob mob)) continue;
+                
+                String ownerUuidStr = TemporaryEntityData.getString(mob.getUUID(), MetadataKeys.Earth.CHARMED_OWNER);
+                if (ownerUuidStr == null) {
+                    ownerUuidStr = TemporaryEntityData.getString(mob.getUUID(), MetadataKeys.Death.SUMMONED_OWNER);
+                }
+
+                if (ownerUuidStr != null) {
+                    long until = TemporaryEntityData.getLong(mob.getUUID(), MetadataKeys.Earth.CHARMED_UNTIL);
+                    if (until == 0) {
+                        until = TemporaryEntityData.getLong(mob.getUUID(), MetadataKeys.Death.SUMMONED_UNTIL);
+                    }
+
+                    if (System.currentTimeMillis() > until) {
+                        // Charm/Summon expired
+                        boolean isSummoned = TemporaryEntityData.getString(mob.getUUID(), MetadataKeys.Death.SUMMONED_OWNER) != null;
+                        
+                        TemporaryEntityData.remove(mob.getUUID(), MetadataKeys.Earth.CHARMED_OWNER);
+                        TemporaryEntityData.remove(mob.getUUID(), MetadataKeys.Earth.CHARMED_UNTIL);
+                        TemporaryEntityData.remove(mob.getUUID(), MetadataKeys.Death.SUMMONED_OWNER);
+                        TemporaryEntityData.remove(mob.getUUID(), MetadataKeys.Death.SUMMONED_UNTIL);
+                        mob.removeEffect(MobEffects.GLOWING);
+                        
+                        // If it's a summoned mob, kill it
+                        if (isSummoned) {
+                             mob.discard();
+                        }
+                        continue;
+                    }
+                    
+                    // Handle charmed mob behavior
+                    try {
+                        java.util.UUID ownerUuid = java.util.UUID.fromString(ownerUuidStr);
+                        ServerPlayer owner = serverWorld.getServer().getPlayerList().getPlayer(ownerUuid);
+                        
+                        if (owner != null && owner.level() == mob.level()) {
+                            double distSq = mob.distanceToSqr(owner);
+                            
+                            // Follow owner if too far
+                            if (distSq > 100) { // 10 blocks
+                                mob.getNavigation().moveTo(owner, 1.2);
+                            }
+                            
+                            // Teleport if way too far
+                            if (distSq > 400) { // 20 blocks
+                                mob.teleportTo(owner.getX(), owner.getY(), owner.getZ());
+                            }
+                            
+                            // Protect owner
+                            LivingEntity attacker = owner.getLastHurtByMob();
+                            if (attacker != null && attacker.isAlive() && attacker != mob) {
+                                mob.setTarget(attacker);
+                            }
+                            
+                            // Attack owner's target
+                            LivingEntity ownerTarget = owner.getLastHurtMob();
+                            if (ownerTarget != null && ownerTarget.isAlive() && ownerTarget != mob) {
+                                mob.setTarget(ownerTarget);
+                            }
+                        }
+                    } catch (Exception ignored) {}
+                }
+            }
+        });
+    }
+
     private boolean isOre(Block block) {
         return block == Blocks.COAL_ORE || block == Blocks.DEEPSLATE_COAL_ORE ||
                 block == Blocks.IRON_ORE || block == Blocks.DEEPSLATE_IRON_ORE ||
@@ -232,6 +344,16 @@ public class ElementPassiveListener {
                 block == Blocks.REDSTONE_ORE || block == Blocks.DEEPSLATE_REDSTONE_ORE ||
                 block == Blocks.COPPER_ORE || block == Blocks.DEEPSLATE_COPPER_ORE ||
                 block == Blocks.NETHER_GOLD_ORE || block == Blocks.NETHER_QUARTZ_ORE;
+    }
+
+    private boolean isUndeadFood(ItemStack stack) {
+        return stack.is(Items.ROTTEN_FLESH) || 
+               stack.is(Items.BEEF) || 
+               stack.is(Items.CHICKEN) || 
+               stack.is(Items.PORKCHOP) || 
+               stack.is(Items.MUTTON) || 
+               stack.is(Items.RABBIT) || 
+               stack.is(Items.SPIDER_EYE);
     }
 
     /**

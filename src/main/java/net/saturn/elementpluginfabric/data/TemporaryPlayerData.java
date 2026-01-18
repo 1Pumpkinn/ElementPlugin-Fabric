@@ -23,6 +23,14 @@ public class TemporaryPlayerData {
         playerFlags.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).put(key, value);
     }
 
+    public static boolean getBoolean(UUID playerId, String key) {
+        return getLong(playerId, key) == 1L;
+    }
+
+    public static void putBoolean(UUID playerId, String key, boolean value) {
+        putLong(playerId, key, value ? 1L : 0L);
+    }
+
     public static void remove(UUID playerId, String key) {
         Map<String, Long> flags = playerFlags.get(playerId);
         if (flags != null) {

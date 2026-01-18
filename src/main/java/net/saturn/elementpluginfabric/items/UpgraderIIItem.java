@@ -22,6 +22,7 @@ public class UpgraderIIItem extends Item {
     
     @Override
     public InteractionResult use(Level level, Player user, InteractionHand hand) {
+        ItemStack stack = user.getItemInHand(hand);
         if (user instanceof ServerPlayer player) {
             ElementManager elementManager = ElementPluginFabric.getInstance().getElementManager();
             ElementType currentElement = elementManager.getPlayerElement(player);
@@ -58,7 +59,6 @@ public class UpgraderIIItem extends Item {
                 .withStyle(ChatFormatting.GREEN));
             
             // Consume item
-            ItemStack stack = user.getItemInHand(hand);
             if (!player.isCreative()) {
                 stack.shrink(1);
             }

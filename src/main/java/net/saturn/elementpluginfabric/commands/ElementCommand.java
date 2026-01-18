@@ -13,6 +13,7 @@ import net.minecraft.ChatFormatting;
 import net.saturn.elementpluginfabric.ElementPluginFabric;
 import net.saturn.elementpluginfabric.elements.ElementType;
 import net.saturn.elementpluginfabric.managers.ElementManager;
+import net.saturn.elementpluginfabric.gui.ElementSelectionGUI;
 
 public class ElementCommand {
 
@@ -34,8 +35,19 @@ public class ElementCommand {
                         .executes(ElementCommand::rollElement))
                 .then(Commands.literal("reroll")
                         .executes(ElementCommand::rerollElement))
+                .then(Commands.literal("select")
+                        .executes(ElementCommand::selectElement))
                 .then(Commands.literal("info")
                         .executes(ElementCommand::infoElement)));
+    }
+
+    private static int selectElement(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        ServerPlayer player = source.getPlayerOrException();
+
+        ElementSelectionGUI.open(player);
+
+        return 1;
     }
 
     private static int setElement(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {

@@ -92,7 +92,7 @@ public class Ability1 {
                 MetadataKeys.Metal.CHAIN_STUN,
                 System.currentTimeMillis() + Constants.Duration.METAL_CHAIN_STUN_MS
         );
-        target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 255)); // 3 seconds, can't move
+        // Removed slowness as stun is now handled by LivingEntityMixin
 
         player.sendSystemMessage(Component.literal("Metal Chain! Pulled and stunned " + target.getName().getString() + "!")
                 .withStyle(ChatFormatting.GRAY));

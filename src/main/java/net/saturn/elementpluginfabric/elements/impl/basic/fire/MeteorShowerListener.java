@@ -21,14 +21,15 @@ public class MeteorShowerListener {
 
     private void startMeteorTicker() {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
-            for (MeteorShowerData meteor : activeMeteors.values()) {
+            activeMeteors.values().removeIf(meteor -> {
                 meteor.tick();
                 if (meteor.isExpired()) {
-                    activeMeteors.remove(meteor.getPlayer().getUUID());
                     meteor.getPlayer().sendSystemMessage(Component.literal("Meteor Shower ended!")
                             .withStyle(ChatFormatting.GRAY));
+                    return true;
                 }
-            }
+                return false;
+            });
         });
     }
 }

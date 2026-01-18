@@ -10,6 +10,10 @@ public class CommandRegistry {
             ElementPluginFabric.LOGGER.info("Registering commands...");
             ElementCommand.register(dispatcher, registryAccess, environment);
             ManaCommand.register(dispatcher, registryAccess, environment);
+            TrustCommand.register(dispatcher, registryAccess, environment);
+            ConfigCommand.register(dispatcher, registryAccess, environment);
+            ElementItemCommand.register(dispatcher, registryAccess, environment);
+            RerollCommand.register(dispatcher, registryAccess, environment);
             ElementPluginFabric.LOGGER.info("Commands registered successfully");
         });
     }

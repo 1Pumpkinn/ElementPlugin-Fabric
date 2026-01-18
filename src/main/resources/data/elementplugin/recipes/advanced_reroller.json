@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "EDE",
+    "DRD",
+    "EDE"
+  ],
+  "key": {
+    "E": {
+      "item": "minecraft:emerald"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "R": {
+      "item": "elementplugin:reroller"
+    }
+  },
+  "result": {
+    "id": "elementplugin:advanced_reroller",
+    "count": 1
+  }
+}

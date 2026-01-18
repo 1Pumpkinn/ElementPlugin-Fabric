@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "NDN",
+    "DUD",
+    "NDN"
+  ],
+  "key": {
+    "N": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "U": {
+      "item": "elementplugin:upgrader_i"
+    }
+  },
+  "result": {
+    "id": "elementplugin:upgrader_ii",
+    "count": 1
+  }
+}

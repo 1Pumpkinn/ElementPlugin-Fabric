@@ -21,6 +21,7 @@ public class RerollerItem extends Item {
     
     @Override
     public InteractionResult use(Level level, Player user, InteractionHand hand) {
+        ItemStack stack = user.getItemInHand(hand);
         if (user instanceof ServerPlayer player) {
             ElementManager elementManager = ElementPluginFabric.getInstance().getElementManager();
             ManaManager manaManager = ElementPluginFabric.getInstance().getManaManager();
@@ -46,10 +47,9 @@ public class RerollerItem extends Item {
             }
             
             // Roll for a different element
-            elementManager.assignRandomDifferentElement(player);
+            elementManager.assignRandomDifferentBasicElement(player);
             
             // Consume item
-            ItemStack stack = user.getItemInHand(hand);
             if (!player.isCreative()) {
                 stack.shrink(1);
             }

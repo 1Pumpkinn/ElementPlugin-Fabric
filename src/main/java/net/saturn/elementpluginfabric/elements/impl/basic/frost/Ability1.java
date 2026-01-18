@@ -51,7 +51,6 @@ public class Ability1 {
         );
 
         for (LivingEntity entity : nearbyEntities) {
-            entity.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 200, 3)); // 10s, Slowness IV
             TemporaryEntityData.putLong(
                     entity.getUUID(),
                     MetadataKeys.Frost.CIRCLE_FROZEN,
@@ -59,7 +58,7 @@ public class Ability1 {
             );
         }
 
-        player.sendSystemMessage(Component.literal("Freezing Circle! Slowed " + nearbyEntities.size() + " enemies!")
+        player.sendSystemMessage(Component.literal("Freezing Circle! Stunned " + nearbyEntities.size() + " enemies!")
                 .withStyle(ChatFormatting.AQUA));
 
         return true;

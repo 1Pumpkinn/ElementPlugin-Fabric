@@ -21,6 +21,7 @@ public class AdvancedRerollerItem extends Item {
     
     @Override
     public InteractionResult use(Level level, Player user, InteractionHand hand) {
+        ItemStack stack = user.getItemInHand(hand);
         if (user instanceof ServerPlayer player) {
             ElementManager elementManager = ElementPluginFabric.getInstance().getElementManager();
             ManaManager manaManager = ElementPluginFabric.getInstance().getManaManager();
@@ -32,7 +33,7 @@ public class AdvancedRerollerItem extends Item {
                 return InteractionResult.FAIL;
             }
             
-            // Check mana cost (advanced reroller might have different cost)
+            // Check mana cost
             int cost = ElementPluginFabric.getInstance().getConfigManager().getItemUseCost(null);
             if (!manaManager.hasMana(player, cost)) {
                 player.sendSystemMessage(Component.literal("Not enough mana! Need " + cost)
@@ -45,12 +46,10 @@ public class AdvancedRerollerItem extends Item {
                 return InteractionResult.FAIL;
             }
             
-            // Advanced reroller can choose any element, including special ones
-            // For now, just do a normal roll
-            elementManager.rollAndAssign(player);
+            // Roll for a different element
+            elementManager.assignRandomDifferentAdvancedElement(player);
             
             // Consume item
-            ItemStack stack = user.getItemInHand(hand);
             if (!player.isCreative()) {
                 stack.shrink(1);
             }

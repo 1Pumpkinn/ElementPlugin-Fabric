@@ -8,6 +8,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.saturn.elementpluginfabric.ElementPluginFabric;
+import net.saturn.elementpluginfabric.config.MetadataKeys;
+import net.saturn.elementpluginfabric.data.TemporaryEntityData;
 import net.saturn.elementpluginfabric.elements.ElementContext;
 import net.saturn.elementpluginfabric.elements.ElementType;
 import net.saturn.elementpluginfabric.managers.ManaManager;
@@ -63,7 +65,11 @@ public class Ability2 {
 
         if (hitEntities.isEmpty()) {
             // Missed all enemies - stun self for 5 seconds
-            player.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 100, 255));
+            TemporaryEntityData.putLong(
+                    player.getUUID(),
+                    MetadataKeys.Metal.DASH_STUN,
+                    System.currentTimeMillis() + 5000L
+            );
             player.sendSystemMessage(Component.literal("Metal Dash missed! You're stunned!")
                     .withStyle(ChatFormatting.RED));
         } else {

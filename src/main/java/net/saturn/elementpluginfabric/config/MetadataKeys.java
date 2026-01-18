@@ -23,6 +23,7 @@ public final class MetadataKeys {
 
     public static final class Metal {
         public static final String CHAIN_STUN = "metal_chain_stunned";
+        public static final String DASH_STUN = "metal_dash_stunned";
 
         private Metal() {}
     }

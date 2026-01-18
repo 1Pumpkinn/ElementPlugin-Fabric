@@ -15,12 +15,12 @@ public class FreezeHelper {
      * Called when player punches an entity with Frozen Punch ready
      */
     public static void freezeEntity(LivingEntity target) {
-        target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 100, 255)); // 5s, can't move
         TemporaryEntityData.putLong(
                 target.getUUID(),
                 MetadataKeys.Frost.FROZEN,
                 System.currentTimeMillis() + Constants.Duration.FROST_FREEZE_MS
         );
+        // Removed slowness as stun is now handled by LivingEntityMixin
     }
 }
 

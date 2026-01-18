@@ -1,7 +1,10 @@
 package net.saturn.elementpluginfabric.elements.impl.basic.life;
 
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.ChatFormatting;
 import net.saturn.elementpluginfabric.elements.ElementContext;
 
@@ -65,6 +68,21 @@ public class HealingBeamData {
                 target.heal(HEAL_PER_SECOND);
                 target.sendSystemMessage(Component.literal("✚ Healing...")
                         .withStyle(ChatFormatting.GREEN), true);
+                
+                // Add particles at target
+                if (player.level() instanceof ServerLevel serverLevel) {
+                    serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER, target.getX(), target.getY() + 1, target.getZ(), 5, 0.2, 0.2, 0.2, 0.1);
+                }
+            }
+        }
+
+        // Draw beam particles
+        if (player.level() instanceof ServerLevel serverLevel) {
+            var start = player.getEyePosition();
+            var direction = player.getLookAngle();
+            for (double i = 1; i < 20; i += 0.5) {
+                Vec3 point = start.add(direction.scale(i));
+                serverLevel.sendParticles(ParticleTypes.HEART, point.x, point.y, point.z, 1, 0, 0, 0, 0);
             }
         }
 

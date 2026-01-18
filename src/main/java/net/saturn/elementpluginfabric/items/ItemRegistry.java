@@ -16,20 +16,22 @@ import java.lang.reflect.Method;
 public class ItemRegistry {
     
     // Item instances - created and registered here
-    public static final Item UPGRADER_I = registerItem("upgrader_I", UpgraderIItem::new);
-    public static final Item UPGRADER_II = registerItem("upgrader_II", UpgraderIIItem::new);
+    public static final Item UPGRADER_I = registerItem("upgrader_i", UpgraderIItem::new);
+    public static final Item UPGRADER_II = registerItem("upgrader_ii", UpgraderIIItem::new);
     public static final Item REROLLER = registerItem("reroller", RerollerItem::new);
     public static final Item ADVANCED_REROLLER = registerItem("advanced_reroller", AdvancedRerollerItem::new);
+    public static final Item ELEMENT_CORE = registerItem("element_core", ElementCoreItem::new);
     
     public static void register() {
         ElementPluginFabric.LOGGER.info("Starting item registration...");
         
         // Items are already registered via static field initialization above
         // Force initialization by accessing the fields
-        ElementPluginFabric.LOGGER.info("Item UPGRADER_1 registered: {}", BuiltInRegistries.ITEM.getKey(UPGRADER_I));
-        ElementPluginFabric.LOGGER.info("Item UPGRADER_2 registered: {}", BuiltInRegistries.ITEM.getKey(UPGRADER_II));
+        ElementPluginFabric.LOGGER.info("Item UPGRADER_I registered: {}", BuiltInRegistries.ITEM.getKey(UPGRADER_I));
+        ElementPluginFabric.LOGGER.info("Item UPGRADER_II registered: {}", BuiltInRegistries.ITEM.getKey(UPGRADER_II));
         ElementPluginFabric.LOGGER.info("Item REROLLER registered: {}", BuiltInRegistries.ITEM.getKey(REROLLER));
         ElementPluginFabric.LOGGER.info("Item ADVANCED_REROLLER registered: {}", BuiltInRegistries.ITEM.getKey(ADVANCED_REROLLER));
+        ElementPluginFabric.LOGGER.info("Item ELEMENT_CORE registered: {}", BuiltInRegistries.ITEM.getKey(ELEMENT_CORE));
         
         // Now add them to creative inventory
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries -> {
@@ -37,6 +39,7 @@ public class ItemRegistry {
             entries.accept(UPGRADER_II);
             entries.accept(REROLLER);
             entries.accept(ADVANCED_REROLLER);
+            entries.accept(ELEMENT_CORE);
         });
         
         ElementPluginFabric.LOGGER.info("Registered custom items successfully");

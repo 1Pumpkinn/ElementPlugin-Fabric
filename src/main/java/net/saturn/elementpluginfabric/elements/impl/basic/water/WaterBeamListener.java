@@ -20,14 +20,15 @@ public class WaterBeamListener {
 
     private void startBeamTicker() {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
-            for (WaterBeamData beam : activeBeams.values()) {
+            activeBeams.values().removeIf(beam -> {
                 beam.tick();
                 if (beam.isExpired()) {
-                    activeBeams.remove(beam.getPlayer().getUUID());
                     beam.getPlayer().sendSystemMessage(Component.literal("Water Beam ended!")
                             .withStyle(ChatFormatting.GRAY));
+                    return true;
                 }
-            }
+                return false;
+            });
         });
     }
 }
