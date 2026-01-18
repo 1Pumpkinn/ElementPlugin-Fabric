@@ -111,6 +111,7 @@ public class ElementPluginFabric implements ModInitializer {
     private void registerListeners() {
         LOGGER.info("Registering listeners...");
         ElementPassiveListener.register(this);
+        net.saturn.elementpluginfabric.listeners.PlayerConnectionListener.register(this);
         LOGGER.info("Listeners registered");
     }
 

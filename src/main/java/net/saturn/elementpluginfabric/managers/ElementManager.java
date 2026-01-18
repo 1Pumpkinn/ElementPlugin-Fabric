@@ -222,6 +222,21 @@ public class ElementManager {
         return useAbility(player, 2);
     }
 
+    public boolean canUseAbility1(ServerPlayer player) {
+        PlayerData pd = data(player.getUUID());
+        return pd.getCurrentElementUpgradeLevel() >= 1;
+    }
+
+    public boolean canUseAbility2(ServerPlayer player) {
+        PlayerData pd = data(player.getUUID());
+        return pd.getCurrentElementUpgradeLevel() >= 2;
+    }
+
+    public boolean canUsePassive2(ServerPlayer player) {
+        PlayerData pd = data(player.getUUID());
+        return pd.getCurrentElementUpgradeLevel() >= 2;
+    }
+
     private boolean useAbility(ServerPlayer player, int number) {
         PlayerData pd = data(player.getUUID());
         ElementType type = pd.getCurrentElement();
@@ -229,6 +244,19 @@ public class ElementManager {
 
         if (element == null) {
             player.sendSystemMessage(Component.literal("You don't have an element assigned!")
+                    .withStyle(net.minecraft.ChatFormatting.RED));
+            return false;
+        }
+
+        // Check upgrade levels
+        int currentUpgrade = pd.getCurrentElementUpgradeLevel();
+        if (number == 1 && currentUpgrade < 1) {
+            player.sendSystemMessage(Component.literal("You need Upgrader I to use this ability!")
+                    .withStyle(net.minecraft.ChatFormatting.RED));
+            return false;
+        }
+        if (number == 2 && currentUpgrade < 2) {
+            player.sendSystemMessage(Component.literal("You need Upgrader II to use this ability!")
                     .withStyle(net.minecraft.ChatFormatting.RED));
             return false;
         }
