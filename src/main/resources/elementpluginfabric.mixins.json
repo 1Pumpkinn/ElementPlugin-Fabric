@@ -1,10 +1,11 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "net.saturn.elementpluginfabric.mixin",
+  "package": "net.saturn.elementmod.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "LivingEntityMixin"
+    "LivingEntityMixin",
+    "LivingEntityAccessor"
   ],
   "client": [
   ],

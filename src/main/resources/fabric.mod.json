@@ -1,33 +1,28 @@
 {
   "schemaVersion": 1,
-  "id": "elementplugin",
+  "id": "elementmod",
   "version": "${version}",
-  "name": "ElementPlugin",
-  "description": "Element system plugin for Fabric 1.21.10",
-  "authors": [
-    "___Pumpkinn"],
-  "contact": {
-    "homepage": "https://ko-fi.com/1pumpkinn"
-  },
+  "name": "Fnaf",
+  "description": "",
+  "authors": [],
+  "contact": {},
   "license": "MIT",
-  "icon": "assets/elementplugin/icon.png",
+  "icon": "assets/fnaf/icon.png",
   "environment": "*",
   "entrypoints": {
-    "main": [
-      "net.saturn.elementpluginfabric.ElementPluginFabric"
-    ],
     "client": [
-      "net.saturn.elementpluginfabric.client.ElementpluginfabricClient"
+      "net.saturn.elementmod.client.ElementpluginfabricClient"
+    ],
+    "main": [
+      "net.saturn.elementmod.ElementMod"
     ]
   },
   "mixins": [
     "elementpluginfabric.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=0.18.0",
+    "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
-    "minecraft": "~1.21.10",
-    "java": ">=21"
+    "minecraft": "${minecraft_version}"
   }
 }
-
